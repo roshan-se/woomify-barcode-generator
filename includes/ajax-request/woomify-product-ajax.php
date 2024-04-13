@@ -79,3 +79,36 @@ function woomify_update_product_stock() {
 }
 
 
+// Register AJAX action for both logged-in and logged-out users
+add_action('wp_ajax_woomify_get_products', 'wp_ajax_woomify_get_products');
+
+function wp_ajax_woomify_get_products() {
+    // Check for user permissions, if needed
+    // if (!current_user_can('manage_options')) {
+    //     wp_send_json_error('You do not have sufficient permissions');
+    //     wp_die();
+    // }
+
+    // Get products from WooCommerce
+    $args = array(
+        'status' => 'publish',
+    );
+    $products = wc_get_products($args);
+    $product_data = [];
+
+    foreach ($products as $product) {
+        $product_data[] = [
+            'productId' => $product->get_id(),
+            'name' => $product->get_name(),
+            'price' => $product->get_price(),  // Returns the current price or sale price if on sale
+            'sku' => $product->get_sku(),
+        ];
+    }
+
+    // Return data as JSON
+    wp_send_json_success($product_data);
+    wp_die();  // terminate immediately and return a proper response
+}
+
+
+

@@ -1,75 +1,10 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./src/components/GlobalSettings.js":
-/*!******************************************!*\
-  !*** ./src/components/GlobalSettings.js ***!
-  \******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ GlobalSettings)
-/* harmony export */ });
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "react");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _global_CsvImporter__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./global/CsvImporter */ "./src/components/global/CsvImporter.js");
-/* harmony import */ var _global_DownloadCsv__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./global/DownloadCsv */ "./src/components/global/DownloadCsv.js");
-/* harmony import */ var _global_HidePriceOption__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./global/HidePriceOption */ "./src/components/global/HidePriceOption.js");
-/* harmony import */ var react_barcode__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react-barcode */ "./node_modules/react-barcode/lib/react-barcode.js");
-/* harmony import */ var react_barcode__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(react_barcode__WEBPACK_IMPORTED_MODULE_5__);
-
-
-
-
-
-
-function GlobalSettings() {
-  const generateUniqueBarcodeNumber = () => {
-    let uniqueId = Date.now().toString().slice(-10);
-
-    // Optionally, you can add a random number to ensure uniqueness in high-frequency scenarios
-    let randomPart = Math.floor(Math.random() * 1000).toString().padStart(3, "0");
-
-    // Concatenate the time-based ID with the random part
-    return uniqueId + randomPart;
-  };
-  const [barcode, setBarcode] = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)({
-    productName: "Terminator Case - iPhone 15",
-    productNumber: ""
-  });
-  const generateBarcode = () => {
-    setBarcode(prevBarcode => ({
-      ...prevBarcode,
-      productNumber: generateUniqueBarcodeNumber()
-    }));
-  };
-  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-    className: "relative"
-  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-    className: "max-w-sm pb-10 divide-y divide-slate-100"
-  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("button", {
-    onClick: generateBarcode,
-    className: "bg-sky-400 hover:bg-sky-500 text-gray-50 hover:text-gray-50 px-4 py-2 rounded-tr-md rounded-bl-md"
-  }, "Generate Barcode"), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("hr", null), barcode.productNumber && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-    className: "border rounded-md shadow-md p-4 my-4 flex flex-col items-center"
-  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("h3", {
-    className: "text-base font-semibold"
-  }, barcode.productName), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)((react_barcode__WEBPACK_IMPORTED_MODULE_5___default()), {
-    value: barcode.productNumber,
-    width: 2
-  })))));
-}
-
-/***/ }),
-
-/***/ "./src/components/PriceChecker.js":
-/*!****************************************!*\
-  !*** ./src/components/PriceChecker.js ***!
-  \****************************************/
+/***/ "./src/components/GenerateBarcode.js":
+/*!*******************************************!*\
+  !*** ./src/components/GenerateBarcode.js ***!
+  \*******************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -79,37 +14,62 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "react");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var react_barcode__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react-barcode */ "./node_modules/react-barcode/lib/react-barcode.js");
+/* harmony import */ var react_barcode__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react_barcode__WEBPACK_IMPORTED_MODULE_2__);
+
+
 
 
 const {
-  dreamify_rules_options
+  ajax_url
 } = woomify_barcode_generator_data;
-console.log("Checking data for Price Checker", JSON.stringify(dreamify_rules_options));
-const PriceChecker = () => {
+const GenerateBarcode = () => {
   const [searchTerm, setSearchTerm] = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)("");
+  const [products, setProducts] = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)([]);
   const [filteredProducts, setFilteredProducts] = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)([]);
+  const [barcodeList, setBarcodeList] = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)([]);
+  (0,react__WEBPACK_IMPORTED_MODULE_1__.useEffect)(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios__WEBPACK_IMPORTED_MODULE_3__["default"].post(ajax_url, new URLSearchParams({
+          action: "woomify_get_products"
+        }));
+        setProducts(response.data.data);
+        console.log("Checking Product WOomify: ", products);
+      } catch (error) {
+        console.error("Error fetching products: ", error);
+      }
+    };
+    fetchProducts();
+  }, []);
   const handleSearch = event => {
     const value = event.target.value;
     setSearchTerm(value);
     const searchTerms = value.toLowerCase().split(" ").filter(term => term.length > 0);
-    const filtered = dreamify_rules_options.filter(product => {
+    const filtered = products.filter(product => {
       return searchTerms.every(term => product.name.toLowerCase().includes(term));
     });
     setFilteredProducts(filtered);
   };
-  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("h3", {
-    className: "text-base font-medium"
-  }, "Price Checker"), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+  const addToBarcodeList = product => {
+    if (!barcodeList.some(item => item.productId === product.productId)) {
+      setBarcodeList([...barcodeList, product]);
+    }
+  };
+  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
     className: "container mx-auto p-4"
-  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("input", {
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("h3", {
+    className: "text-xl font-semibold mb-2"
+  }, "WooCommerce Product List"), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("input", {
     type: "text",
-    placeholder: "Enter product name to check price...",
+    placeholder: "Enter product name for which you want barcode...",
     value: searchTerm,
     onChange: handleSearch,
     className: "price-checker-input"
-  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("table", {
+  }), filteredProducts.length > 0 && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("table", {
     className: "w-full mt-4 border-collapse border border-gray-300"
   }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("thead", {
     className: "bg-gray-100"
@@ -119,222 +79,62 @@ const PriceChecker = () => {
     className: "border px-4 py-2"
   }, "Name"), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("th", {
     className: "border px-4 py-2"
-  }, "Wholesale"), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("th", {
+  }, "Price"), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("th", {
     className: "border px-4 py-2"
-  }, "Discount"), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("th", {
-    className: "border px-4 py-2"
-  }, "VIP"), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("th", {
-    className: "border px-4 py-2"
-  }, "PP"))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("tbody", null, filteredProducts.map(product => (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("tr", {
+  }, "Action"))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("tbody", null, filteredProducts.map(product => (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("tr", {
     key: product.productId
   }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", {
     className: "border px-4 py-2"
   }, product.productId), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", {
     className: "border px-4 py-2"
-  }, product.name), product.rules.map(rule => (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", {
-    key: rule.id,
+  }, product.name), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", {
     className: "border px-4 py-2"
-  }, rule.sale_price))))))));
+  }, product.price), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", {
+    className: "border px-4 py-2 text-center "
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("button", {
+    onClick: () => addToBarcodeList(product),
+    className: "bg-gradient-to-r from-violet-500 to-fuchsia-500 text-gray-50 hover:text-gray-50 px-4 py-2 rounded-md"
+  }, "Get Barcode")))))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "mt-4"
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("hr", null), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("h3", {
+    className: "text-xl font-semibold mt-4"
+  }, "Product Barcode List"), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "grid grid-cols-4 gap-x-2"
+  }, barcodeList.map(product => (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "border rounded-md shadow-md p-4 my-4 flex flex-col items-center"
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("h3", {
+    className: "text-base font-semibold"
+  }, product.name), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)((react_barcode__WEBPACK_IMPORTED_MODULE_2___default()), {
+    value: product.sku,
+    width: 2
+  })))))));
 };
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (PriceChecker);
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (GenerateBarcode);
 
 /***/ }),
 
-/***/ "./src/components/global/CsvImporter.js":
-/*!**********************************************!*\
-  !*** ./src/components/global/CsvImporter.js ***!
-  \**********************************************/
+/***/ "./src/components/ManageInventory.js":
+/*!*******************************************!*\
+  !*** ./src/components/ManageInventory.js ***!
+  \*******************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ DreamifyCsvImporter)
+/* harmony export */   "default": () => (/* binding */ ManageInventory)
 /* harmony export */ });
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "react");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var react_csv_reader__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react-csv-reader */ "./node_modules/react-csv-reader/dist/react-csv-reader.js");
-/* harmony import */ var react_csv_reader__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react_csv_reader__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var react_barcode__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react-barcode */ "./node_modules/react-barcode/lib/react-barcode.js");
+/* harmony import */ var react_barcode__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react_barcode__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var react_notifications__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react-notifications */ "./node_modules/react-notifications/lib/index.js");
-/* harmony import */ var react_notifications_lib_notifications_css__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react-notifications/lib/notifications.css */ "./node_modules/react-notifications/lib/notifications.css");
+/* harmony import */ var use_scan_detection_react18__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! use-scan-detection-react18 */ "./node_modules/use-scan-detection-react18/dist/index.js");
 
 
-
-
-
-
-const {
-  ajax_url,
-  dreamify_rules_options_modification_date
-} = woomify_barcode_generator_data;
-function DreamifyCsvImporter() {
-  const [rules, setRules] = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)([]);
-  const handleCSVFile = (data, fileInfo) => {
-    console.log("CSV Data:", data);
-    const newData = data.map(item => {
-      const {
-        ID,
-        Name,
-        Regular,
-        Wholesale,
-        VIP,
-        Discount,
-        PP
-      } = item;
-      return {
-        productId: ID,
-        name: Name,
-        regular_price: Regular,
-        rules: [{
-          id: 1,
-          role: "Wholesale",
-          regular_price: Wholesale || ""
-        }, {
-          id: 2,
-          role: "Discount",
-          regular_price: Discount || ""
-        }, {
-          id: 3,
-          role: "VIP",
-          regular_price: VIP || ""
-        }, {
-          id: 4,
-          role: "PP",
-          regular_price: PP || ""
-        }]
-      };
-    });
-    console.log(newData);
-    setRules(newData);
-  };
-  const saveRules = e => {
-    e.preventDefault();
-    console.log("Now saving rules");
-    const data = {
-      action: "my_save_rules_action",
-      data: JSON.stringify(rules)
-    };
-    axios__WEBPACK_IMPORTED_MODULE_5__["default"].post(ajax_url, new URLSearchParams(data)).then(response => {
-      console.log("Checking Response after saving: ", response);
-      const inputField = document.getElementById("react-csv-reader-input");
-      inputField.value = "";
-      react_notifications__WEBPACK_IMPORTED_MODULE_3__.NotificationManager.success("File Imported Successfully", "Price Rule CSV");
-    }).catch(error => {
-      // Handle errors if any
-      console.error(error);
-    });
-  };
-  const handleCSVError = (err, file, inputElem, reason) => {
-    console.error(err);
-  };
-  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-    className: "py-4"
-  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-    className: "mb-2"
-  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("h3", {
-    className: "text-base font-medium"
-  }, "Import Pricing Rules - CSV Import"), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", {
-    className: "text-gray-500"
-  }, "You can import your price rules through csv file format.")), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-    className: "flex p-2 items-center justify-between border border-emerald-50 rounded-md shadow-md"
-  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)((react_csv_reader__WEBPACK_IMPORTED_MODULE_2___default()), {
-    onFileLoaded: handleCSVFile,
-    onError: handleCSVError,
-    parserOptions: {
-      header: true,
-      skipEmptyLines: true
-    }
-  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("button", {
-    onClick: saveRules,
-    className: "bg-emerald-400 hover:bg-emerald-500 text-gray-50 px-4 py-2 rounded-tr-md rounded-bl-md"
-  }, "Import")), dreamify_rules_options_modification_date && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", {
-    className: "text-gray-500 mt-4"
-  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("span", {
-    className: "font-semibold"
-  }, "Last modified date:"), " ", (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("span", {
-    className: "italic underline text-emerald-500"
-  }, dreamify_rules_options_modification_date)), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(react_notifications__WEBPACK_IMPORTED_MODULE_3__.NotificationContainer, null));
-}
-
-/***/ }),
-
-/***/ "./src/components/global/DownloadCsv.js":
-/*!**********************************************!*\
-  !*** ./src/components/global/DownloadCsv.js ***!
-  \**********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ DownloadCsv)
-/* harmony export */ });
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "react");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var react_csv__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react-csv */ "./node_modules/react-csv/index.js");
-
-
-
-const {
-  dreamify_rules_options
-} = woomify_barcode_generator_data;
-function DownloadCsv() {
-  const [users, setUsers] = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)(dreamify_rules_options);
-  const [transformedData, setTransformedData] = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)([]);
-  (0,react__WEBPACK_IMPORTED_MODULE_1__.useEffect)(() => {
-    if (users) {
-      const newData = users.map(item => {
-        const newItem = {
-          productId: item.productId,
-          name: item.name,
-          Regular: item.regular_price
-        };
-        item.rules.forEach(rule => {
-          newItem[rule.role] = rule.sale_price;
-        });
-        return newItem;
-      });
-      setTransformedData(newData);
-    }
-  }, []);
-  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-    className: "py-4"
-  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-    className: "mb-2"
-  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("h3", {
-    className: "text-base font-medium"
-  }, "Download Latest CSV"), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", {
-    className: "text-gray-500"
-  }, "You can download csv to keep track of the product and latest price variation.")), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(react_csv__WEBPACK_IMPORTED_MODULE_2__.CSVLink, {
-    data: transformedData,
-    className: "bg-sky-400 hover:bg-sky-500 text-gray-50 hover:text-gray-50 px-4 py-2 rounded-tr-md rounded-bl-md"
-  }, "Download Me"));
-}
-
-/***/ }),
-
-/***/ "./src/components/global/HidePriceOption.js":
-/*!**************************************************!*\
-  !*** ./src/components/global/HidePriceOption.js ***!
-  \**************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ HidePriceOption)
-/* harmony export */ });
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "react");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var react_notifications__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react-notifications */ "./node_modules/react-notifications/lib/index.js");
 
 
 
@@ -343,44 +143,93 @@ const {
   ajax_url,
   dreamify_hide_price_option
 } = woomify_barcode_generator_data;
-function HidePriceOption() {
-  const [isHidePriceChecked, setIsHidePirceChecked] = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)(false);
-  (0,react__WEBPACK_IMPORTED_MODULE_1__.useEffect)(() => {
-    setIsHidePirceChecked(dreamify_hide_price_option);
-  }, []);
-
-  //dreamify_hide_price_action
-
-  const handleHidePriceChange = async event => {
-    setIsHidePirceChecked(event.target.checked);
+function ManageInventory() {
+  const [barcode, setBarcode] = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)({
+    productName: "Terminator Case - iPhone 15",
+    productNumber: ""
+  });
+  const [barcodeScan, setBarcodeScan] = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)("No Barcode Scanned");
+  const [productDetails, setProductDetails] = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)({});
+  const [newQuantity, setNewQuantity] = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)(null);
+  (0,use_scan_detection_react18__WEBPACK_IMPORTED_MODULE_4__["default"])({
+    onComplete: code => {
+      setBarcodeScan(code);
+      setBarcode(prevBarcode => ({
+        ...prevBarcode,
+        productNumber: code
+      }));
+      console.log("Now I will fetch data");
+      fetchProductDetails(code);
+    },
+    minLength: 3
+  });
+  const fetchProductDetails = async sku => {
     const data = {
-      action: "dreamify_hide_price_action",
-      data: JSON.stringify(event.target.checked)
+      action: "woomify_get_product_details",
+      sku: sku
     };
-    await axios__WEBPACK_IMPORTED_MODULE_3__["default"].post(ajax_url, new URLSearchParams(data)).then(response => {
-      const message = event.target.checked ? "Price is hidden to Guest" : "Price is visible to everyone";
-      const title = event.target.checked ? "Hidden" : "Visible";
-      react_notifications__WEBPACK_IMPORTED_MODULE_2__.NotificationManager.success(message, title);
+    await axios__WEBPACK_IMPORTED_MODULE_5__["default"].post(ajax_url, new URLSearchParams(data)).then(response => {
+      console.log("Checking Product Details: ", response);
+      setProductDetails(response.data);
+      setNewQuantity(response.data.stock_quantity);
     }).catch(error => {
       // Handle errors if any
-      console.error(error);
+      console.error("There was an error fetching the product details: ", error);
+    });
+  };
+  const updateStockQuantity = async (sku, newQuantity) => {
+    await axios__WEBPACK_IMPORTED_MODULE_5__["default"].post(ajax_url, new URLSearchParams({
+      action: "woomify_update_product_stock",
+      sku: sku,
+      quantity: newQuantity
+    })).then(response => {
+      if (response.data.success) {
+        console.log("Stock updated:", response.data);
+        react_notifications__WEBPACK_IMPORTED_MODULE_3__.NotificationManager.success("Product Stock Updated Successfully", "Update Stock");
+        // Optionally refresh the product details or alert the user
+      } else {
+        console.error("Error updating stock:", response.data.data);
+      }
+    }).catch(error => {
+      console.error("AJAX Error:", error);
     });
   };
   return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-    className: "flex justify-between items-center mb-2 py-4"
-  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("h3", {
-    className: "text-base font-medium mr-2"
-  }, "Hide Price Guest User"), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", {
-    className: "text-gray-500"
-  }, "This will disable price view for customer not logged in.")), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-    className: "-mb-0.5"
+    className: "relative"
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "max-w-2xl pb-10 divide-y divide-slate-100"
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "flex flex-col items-center"
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("h2", {
+    className: "text-2xl font-semibold"
+  }, "Product Details"), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("h4", {
+    className: "text-sm text-gray-500 italic mb-4"
+  }, "*** Scan to Update Stock ***"), productDetails.name ? (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "border rounded-md shadow-md p-4 my-4 flex flex-col items-center"
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("h3", {
+    className: "text-base font-semibold"
+  }, productDetails.name), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)((react_barcode__WEBPACK_IMPORTED_MODULE_2___default()), {
+    value: productDetails.sku,
+    width: 2
+  })), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "border rounded-md shadow-md p-4 my-4"
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("h3", {
+    className: "text-base font-semibold"
+  }, "Stock Quantity"), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "flex mt-2"
   }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("input", {
-    type: "checkbox",
-    name: "",
-    id: "",
-    checked: isHidePriceChecked,
-    onChange: handleHidePriceChange
-  })));
+    type: "number",
+    value: newQuantity,
+    onChange: e => setNewQuantity(e.target.value),
+    className: "stock-checker-input w-3/4"
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("button", {
+    className: "w-1/4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-gray-50 hover:text-gray-50 px-4 py-2 rounded-r-md",
+    onClick: () => updateStockQuantity(productDetails.sku, newQuantity)
+  }, "Update"))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("hr", null), "Just Barcode: ", barcode.productNumber) : (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "border rounded-md shadow-md p-10 my-4 "
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("h4", {
+    className: "text-base"
+  }, "No Barcode Scanned Yet")))));
 }
 
 /***/ }),
@@ -665,9 +514,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "react");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _components_GlobalSettings__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../components/GlobalSettings */ "./src/components/GlobalSettings.js");
-/* harmony import */ var react_notifications__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react-notifications */ "./node_modules/react-notifications/lib/index.js");
-/* harmony import */ var _components_PriceChecker__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../components/PriceChecker */ "./src/components/PriceChecker.js");
+/* harmony import */ var react_notifications__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react-notifications */ "./node_modules/react-notifications/lib/index.js");
+/* harmony import */ var _components_ManageInventory__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../components/ManageInventory */ "./src/components/ManageInventory.js");
+/* harmony import */ var _components_GenerateBarcode__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../components/GenerateBarcode */ "./src/components/GenerateBarcode.js");
 
 
 
@@ -675,36 +524,40 @@ __webpack_require__.r(__webpack_exports__);
 
 const tabs = [{
   id: 1,
-  name: "Global Settings",
+  name: "Manage Inventory",
   value: "tab1",
   icon: "dashicons-admin-settings"
 }, {
   id: 2,
-  name: "Price Checker",
-  value: "tab3",
-  icon: "dashicons-filter"
+  name: "Generate Barcode",
+  value: "tab2",
+  icon: "dashicons-editor-justify"
 }];
 const Dashboard = () => {
   const [activeTab, setActiveTab] = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)("tab1");
   return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-    className: "my-4 mr-4 bg-white p-8 shadow-md rounded-md"
+    className: "my-4 mr-4 bg-white shadow-md rounded-md"
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-t-md p-8 text-white"
   }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("h1", {
-    className: "text-xl font-medium mb-6"
-  }, "Woomify Barcode Generator Dashboard"), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-    className: "mt-4"
+    className: "text-4xl font-semibold text-center text-white mb-6"
+  }, "Woomify Barcode Generator")), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "mt-4 p-8"
   }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("ul", {
-    className: "flex border-b"
+    className: "flex border-b gap-x-2"
   }, tabs.map(tab => (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("li", {
     key: tab.value,
-    className: `mb-0 px-4 py-2 cursor-pointer rounded-t-md transition-colors duration-100 ${activeTab === tab.value ? "bg-emerald-400 text-gray-50" : ""}`,
+    className: `mb-0 px-4 py-2 cursor-pointer rounded-t-md transition-colors hover:bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:text-white ${activeTab === tab.value ? "bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white" : ""}`,
     onClick: () => setActiveTab(tab.value)
-  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("a", null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("span", {
-    className: `dashicons ${tab.icon}`
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("a", {
+    className: "hover:text-white"
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("span", {
+    className: `dashicons ${tab.icon} ${tab.icon === "dashicons-editor-justify" ? "rotate-90" : ""}`
   }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("span", {
     className: "ml-1"
   }, tab.name)))))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
     className: "p-4"
-  }, activeTab === "tab2" ? (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_PriceChecker__WEBPACK_IMPORTED_MODULE_4__["default"], null) : (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_GlobalSettings__WEBPACK_IMPORTED_MODULE_2__["default"], null)), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(react_notifications__WEBPACK_IMPORTED_MODULE_3__.NotificationContainer, null));
+  }, activeTab === "tab2" ? (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_GenerateBarcode__WEBPACK_IMPORTED_MODULE_4__["default"], null) : (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_ManageInventory__WEBPACK_IMPORTED_MODULE_3__["default"], null))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(react_notifications__WEBPACK_IMPORTED_MODULE_2__.NotificationContainer, null));
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Dashboard);
 
@@ -6455,485 +6308,6 @@ module.exports = Barcode;
 
 /***/ }),
 
-/***/ "./node_modules/react-csv-reader/dist/react-csv-reader.js":
-/*!****************************************************************!*\
-  !*** ./node_modules/react-csv-reader/dist/react-csv-reader.js ***!
-  \****************************************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-module.exports=function(e){var t={};function r(i){if(t[i])return t[i].exports;var n=t[i]={i:i,l:!1,exports:{}};return e[i].call(n.exports,n,n.exports,r),n.l=!0,n.exports}return r.m=e,r.c=t,r.d=function(e,t,i){r.o(e,t)||Object.defineProperty(e,t,{enumerable:!0,get:i})},r.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},r.t=function(e,t){if(1&t&&(e=r(e)),8&t)return e;if(4&t&&"object"==typeof e&&e&&e.__esModule)return e;var i=Object.create(null);if(r.r(i),Object.defineProperty(i,"default",{enumerable:!0,value:e}),2&t&&"string"!=typeof e)for(var n in e)r.d(i,n,function(t){return e[t]}.bind(null,n));return i},r.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return r.d(t,"a",t),t},r.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},r.p="",r(r.s=0)}([function(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0});const i=r(1),n=r(2),s=r(3),a=i.forwardRef(({accept:e=".csv, text/csv",cssClass:t="csv-reader-input",cssInputClass:r="csv-input",cssLabelClass:n="csv-label",fileEncoding:a="UTF-8",inputId:o="react-csv-reader-input",inputName:u="react-csv-reader-input",inputStyle:h={},label:f,onError:l=(()=>{}),onFileLoaded:d,parserOptions:c={},disabled:p=!1,strict:g=!1},m)=>i.createElement("div",{className:t},f&&i.createElement("label",{className:n,htmlFor:o},f),i.createElement("input",{className:r,type:"file",id:o,name:u,style:h,accept:e,onChange:t=>{let r=new FileReader;const i=t.target.files;if(i.length>0){const t={name:i[0].name,size:i[0].size,type:i[0].type};if(g&&e.indexOf(t.type)<=0)return void l(new Error(`[strict mode] Accept type not respected: got '${t.type}' but not in '${e}'`));r.onload=e=>{var n;const o=s.parse(r.result,Object.assign(c,{error:l,encoding:a}));d(null!==(n=null==o?void 0:o.data)&&void 0!==n?n:[],t,i[0])},r.readAsText(i[0],a)}},disabled:p,ref:m})));a.propTypes={accept:n.string,cssClass:n.string,cssInputClass:n.string,cssLabelClass:n.string,fileEncoding:n.string,inputId:n.string,inputName:n.string,inputStyle:n.object,label:n.oneOfType([n.string,n.element]),onError:n.func,onFileLoaded:n.func.isRequired,parserOptions:n.object,disabled:n.bool,strict:n.bool},t.default=a},function(e,t){e.exports=__webpack_require__(/*! react */ "react")},function(e,t){e.exports=__webpack_require__(/*! prop-types */ "./node_modules/prop-types/index.js")},function(e,t,r){var i,n,s;
-/* @license
-Papa Parse
-v5.3.0
-https://github.com/mholt/PapaParse
-License: MIT
-*/n=[],void 0===(s="function"==typeof(i=function e(){"use strict";var t="undefined"!=typeof self?self:"undefined"!=typeof window?window:void 0!==t?t:{},r=!t.document&&!!t.postMessage,i=r&&/blob:/i.test((t.location||{}).protocol),n={},s=0,a={parse:function(r,i){var o=(i=i||{}).dynamicTyping||!1;if(k(o)&&(i.dynamicTypingFunction=o,o={}),i.dynamicTyping=o,i.transform=!!k(i.transform)&&i.transform,i.worker&&a.WORKERS_SUPPORTED){var u=function(){if(!a.WORKERS_SUPPORTED)return!1;var r,i,o=(r=t.URL||t.webkitURL||null,i=e.toString(),a.BLOB_URL||(a.BLOB_URL=r.createObjectURL(new Blob(["(",i,")();"],{type:"text/javascript"})))),u=new t.Worker(o);return u.onmessage=m,u.id=s++,n[u.id]=u}();return u.userStep=i.step,u.userChunk=i.chunk,u.userComplete=i.complete,u.userError=i.error,i.step=k(i.step),i.chunk=k(i.chunk),i.complete=k(i.complete),i.error=k(i.error),delete i.worker,void u.postMessage({input:r,config:i,workerId:u.id})}var c=null;return a.NODE_STREAM_INPUT,"string"==typeof r?c=i.download?new h(i):new l(i):!0===r.readable&&k(r.read)&&k(r.on)?c=new d(i):(t.File&&r instanceof File||r instanceof Object)&&(c=new f(i)),c.stream(r)},unparse:function(e,t){var r=!1,i=!0,n=",",s="\r\n",o='"',u=o+o,h=!1,f=null,l=!1;!function(){if("object"==typeof t){if("string"!=typeof t.delimiter||a.BAD_DELIMITERS.filter((function(e){return-1!==t.delimiter.indexOf(e)})).length||(n=t.delimiter),("boolean"==typeof t.quotes||"function"==typeof t.quotes||Array.isArray(t.quotes))&&(r=t.quotes),"boolean"!=typeof t.skipEmptyLines&&"string"!=typeof t.skipEmptyLines||(h=t.skipEmptyLines),"string"==typeof t.newline&&(s=t.newline),"string"==typeof t.quoteChar&&(o=t.quoteChar),"boolean"==typeof t.header&&(i=t.header),Array.isArray(t.columns)){if(0===t.columns.length)throw new Error("Option columns is empty");f=t.columns}void 0!==t.escapeChar&&(u=t.escapeChar+o),"boolean"==typeof t.escapeFormulae&&(l=t.escapeFormulae)}}();var d=new RegExp(p(o),"g");if("string"==typeof e&&(e=JSON.parse(e)),Array.isArray(e)){if(!e.length||Array.isArray(e[0]))return g(null,e,h);if("object"==typeof e[0])return g(f||c(e[0]),e,h)}else if("object"==typeof e)return"string"==typeof e.data&&(e.data=JSON.parse(e.data)),Array.isArray(e.data)&&(e.fields||(e.fields=e.meta&&e.meta.fields),e.fields||(e.fields=Array.isArray(e.data[0])?e.fields:c(e.data[0])),Array.isArray(e.data[0])||"object"==typeof e.data[0]||(e.data=[e.data])),g(e.fields||[],e.data||[],h);throw new Error("Unable to serialize unrecognized input");function c(e){if("object"!=typeof e)return[];var t=[];for(var r in e)t.push(r);return t}function g(e,t,r){var a="";"string"==typeof e&&(e=JSON.parse(e)),"string"==typeof t&&(t=JSON.parse(t));var o=Array.isArray(e)&&0<e.length,u=!Array.isArray(t[0]);if(o&&i){for(var h=0;h<e.length;h++)0<h&&(a+=n),a+=m(e[h],h);0<t.length&&(a+=s)}for(var f=0;f<t.length;f++){var l=o?e.length:t[f].length,d=!1,c=o?0===Object.keys(t[f]).length:0===t[f].length;if(r&&!o&&(d="greedy"===r?""===t[f].join("").trim():1===t[f].length&&0===t[f][0].length),"greedy"===r&&o){for(var p=[],g=0;g<l;g++){var _=u?e[g]:g;p.push(t[f][_])}d=""===p.join("").trim()}if(!d){for(var y=0;y<l;y++){0<y&&!c&&(a+=n);var v=o&&u?e[y]:y;a+=m(t[f][v],y)}f<t.length-1&&(!r||0<l&&!c)&&(a+=s)}}return a}function m(e,t){if(null==e)return"";if(e.constructor===Date)return JSON.stringify(e).slice(1,25);!0===l&&"string"==typeof e&&null!==e.match(/^[=+\-@].*$/)&&(e="'"+e);var i=e.toString().replace(d,u);return"boolean"==typeof r&&r||"function"==typeof r&&r(e,t)||Array.isArray(r)&&r[t]||function(e,t){for(var r=0;r<t.length;r++)if(-1<e.indexOf(t[r]))return!0;return!1}(i,a.BAD_DELIMITERS)||-1<i.indexOf(n)||" "===i.charAt(0)||" "===i.charAt(i.length-1)?o+i+o:i}}};if(a.RECORD_SEP=String.fromCharCode(30),a.UNIT_SEP=String.fromCharCode(31),a.BYTE_ORDER_MARK="\ufeff",a.BAD_DELIMITERS=["\r","\n",'"',a.BYTE_ORDER_MARK],a.WORKERS_SUPPORTED=!r&&!!t.Worker,a.NODE_STREAM_INPUT=1,a.LocalChunkSize=10485760,a.RemoteChunkSize=5242880,a.DefaultDelimiter=",",a.Parser=g,a.ParserHandle=c,a.NetworkStreamer=h,a.FileStreamer=f,a.StringStreamer=l,a.ReadableStreamStreamer=d,t.jQuery){var o=t.jQuery;o.fn.parse=function(e){var r=e.config||{},i=[];return this.each((function(e){if("INPUT"!==o(this).prop("tagName").toUpperCase()||"file"!==o(this).attr("type").toLowerCase()||!t.FileReader||!this.files||0===this.files.length)return!0;for(var n=0;n<this.files.length;n++)i.push({file:this.files[n],inputElem:this,instanceConfig:o.extend({},r)})})),n(),this;function n(){if(0!==i.length){var t,r,n,u=i[0];if(k(e.before)){var h=e.before(u.file,u.inputElem);if("object"==typeof h){if("abort"===h.action)return t=u.file,r=u.inputElem,n=h.reason,void(k(e.error)&&e.error({name:"AbortError"},t,r,n));if("skip"===h.action)return void s();"object"==typeof h.config&&(u.instanceConfig=o.extend(u.instanceConfig,h.config))}else if("skip"===h)return void s()}var f=u.instanceConfig.complete;u.instanceConfig.complete=function(e){k(f)&&f(e,u.file,u.inputElem),s()},a.parse(u.file,u.instanceConfig)}else k(e.complete)&&e.complete()}function s(){i.splice(0,1),n()}}}function u(e){this._handle=null,this._finished=!1,this._completed=!1,this._halted=!1,this._input=null,this._baseIndex=0,this._partialLine="",this._rowCount=0,this._start=0,this._nextChunk=null,this.isFirstChunk=!0,this._completeResults={data:[],errors:[],meta:{}},function(e){var t=v(e);t.chunkSize=parseInt(t.chunkSize),e.step||e.chunk||(t.chunkSize=null),this._handle=new c(t),(this._handle.streamer=this)._config=t}.call(this,e),this.parseChunk=function(e,r){if(this.isFirstChunk&&k(this._config.beforeFirstChunk)){var n=this._config.beforeFirstChunk(e);void 0!==n&&(e=n)}this.isFirstChunk=!1,this._halted=!1;var s=this._partialLine+e;this._partialLine="";var o=this._handle.parse(s,this._baseIndex,!this._finished);if(!this._handle.paused()&&!this._handle.aborted()){var u=o.meta.cursor;this._finished||(this._partialLine=s.substring(u-this._baseIndex),this._baseIndex=u),o&&o.data&&(this._rowCount+=o.data.length);var h=this._finished||this._config.preview&&this._rowCount>=this._config.preview;if(i)t.postMessage({results:o,workerId:a.WORKER_ID,finished:h});else if(k(this._config.chunk)&&!r){if(this._config.chunk(o,this._handle),this._handle.paused()||this._handle.aborted())return void(this._halted=!0);o=void 0,this._completeResults=void 0}return this._config.step||this._config.chunk||(this._completeResults.data=this._completeResults.data.concat(o.data),this._completeResults.errors=this._completeResults.errors.concat(o.errors),this._completeResults.meta=o.meta),this._completed||!h||!k(this._config.complete)||o&&o.meta.aborted||(this._config.complete(this._completeResults,this._input),this._completed=!0),h||o&&o.meta.paused||this._nextChunk(),o}this._halted=!0},this._sendError=function(e){k(this._config.error)?this._config.error(e):i&&this._config.error&&t.postMessage({workerId:a.WORKER_ID,error:e,finished:!1})}}function h(e){var t;(e=e||{}).chunkSize||(e.chunkSize=a.RemoteChunkSize),u.call(this,e),this._nextChunk=r?function(){this._readChunk(),this._chunkLoaded()}:function(){this._readChunk()},this.stream=function(e){this._input=e,this._nextChunk()},this._readChunk=function(){if(this._finished)this._chunkLoaded();else{if(t=new XMLHttpRequest,this._config.withCredentials&&(t.withCredentials=this._config.withCredentials),r||(t.onload=b(this._chunkLoaded,this),t.onerror=b(this._chunkError,this)),t.open(this._config.downloadRequestBody?"POST":"GET",this._input,!r),this._config.downloadRequestHeaders){var e=this._config.downloadRequestHeaders;for(var i in e)t.setRequestHeader(i,e[i])}if(this._config.chunkSize){var n=this._start+this._config.chunkSize-1;t.setRequestHeader("Range","bytes="+this._start+"-"+n)}try{t.send(this._config.downloadRequestBody)}catch(e){this._chunkError(e.message)}r&&0===t.status&&this._chunkError()}},this._chunkLoaded=function(){4===t.readyState&&(t.status<200||400<=t.status?this._chunkError():(this._start+=this._config.chunkSize?this._config.chunkSize:t.responseText.length,this._finished=!this._config.chunkSize||this._start>=function(e){var t=e.getResponseHeader("Content-Range");return null===t?-1:parseInt(t.substring(t.lastIndexOf("/")+1))}(t),this.parseChunk(t.responseText)))},this._chunkError=function(e){var r=t.statusText||e;this._sendError(new Error(r))}}function f(e){var t,r;(e=e||{}).chunkSize||(e.chunkSize=a.LocalChunkSize),u.call(this,e);var i="undefined"!=typeof FileReader;this.stream=function(e){this._input=e,r=e.slice||e.webkitSlice||e.mozSlice,i?((t=new FileReader).onload=b(this._chunkLoaded,this),t.onerror=b(this._chunkError,this)):t=new FileReaderSync,this._nextChunk()},this._nextChunk=function(){this._finished||this._config.preview&&!(this._rowCount<this._config.preview)||this._readChunk()},this._readChunk=function(){var e=this._input;if(this._config.chunkSize){var n=Math.min(this._start+this._config.chunkSize,this._input.size);e=r.call(e,this._start,n)}var s=t.readAsText(e,this._config.encoding);i||this._chunkLoaded({target:{result:s}})},this._chunkLoaded=function(e){this._start+=this._config.chunkSize,this._finished=!this._config.chunkSize||this._start>=this._input.size,this.parseChunk(e.target.result)},this._chunkError=function(){this._sendError(t.error)}}function l(e){var t;u.call(this,e=e||{}),this.stream=function(e){return t=e,this._nextChunk()},this._nextChunk=function(){if(!this._finished){var e,r=this._config.chunkSize;return r?(e=t.substring(0,r),t=t.substring(r)):(e=t,t=""),this._finished=!t,this.parseChunk(e)}}}function d(e){u.call(this,e=e||{});var t=[],r=!0,i=!1;this.pause=function(){u.prototype.pause.apply(this,arguments),this._input.pause()},this.resume=function(){u.prototype.resume.apply(this,arguments),this._input.resume()},this.stream=function(e){this._input=e,this._input.on("data",this._streamData),this._input.on("end",this._streamEnd),this._input.on("error",this._streamError)},this._checkIsFinished=function(){i&&1===t.length&&(this._finished=!0)},this._nextChunk=function(){this._checkIsFinished(),t.length?this.parseChunk(t.shift()):r=!0},this._streamData=b((function(e){try{t.push("string"==typeof e?e:e.toString(this._config.encoding)),r&&(r=!1,this._checkIsFinished(),this.parseChunk(t.shift()))}catch(e){this._streamError(e)}}),this),this._streamError=b((function(e){this._streamCleanUp(),this._sendError(e)}),this),this._streamEnd=b((function(){this._streamCleanUp(),i=!0,this._streamData("")}),this),this._streamCleanUp=b((function(){this._input.removeListener("data",this._streamData),this._input.removeListener("end",this._streamEnd),this._input.removeListener("error",this._streamError)}),this)}function c(e){var t,r,i,n=Math.pow(2,53),s=-n,o=/^\s*-?(\d+\.?|\.\d+|\d+\.\d+)(e[-+]?\d+)?\s*$/,u=/(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/,h=this,f=0,l=0,d=!1,c=!1,m=[],_={data:[],errors:[],meta:{}};if(k(e.step)){var y=e.step;e.step=function(t){if(_=t,w())E();else{if(E(),0===_.data.length)return;f+=t.data.length,e.preview&&f>e.preview?r.abort():(_.data=_.data[0],y(_,h))}}}function b(t){return"greedy"===e.skipEmptyLines?""===t.join("").trim():1===t.length&&0===t[0].length}function E(){if(_&&i&&(R("Delimiter","UndetectableDelimiter","Unable to auto-detect delimiting character; defaulted to '"+a.DefaultDelimiter+"'"),i=!1),e.skipEmptyLines)for(var t=0;t<_.data.length;t++)b(_.data[t])&&_.data.splice(t--,1);return w()&&function(){if(_)if(Array.isArray(_.data[0])){for(var t=0;w()&&t<_.data.length;t++)_.data[t].forEach(r);_.data.splice(0,1)}else _.data.forEach(r);function r(t,r){k(e.transformHeader)&&(t=e.transformHeader(t,r)),m.push(t)}}(),function(){if(!_||!e.header&&!e.dynamicTyping&&!e.transform)return _;function t(t,r){var i,n=e.header?{}:[];for(i=0;i<t.length;i++){var s=i,a=t[i];e.header&&(s=i>=m.length?"__parsed_extra":m[i]),e.transform&&(a=e.transform(a,s)),a=C(s,a),"__parsed_extra"===s?(n[s]=n[s]||[],n[s].push(a)):n[s]=a}return e.header&&(i>m.length?R("FieldMismatch","TooManyFields","Too many fields: expected "+m.length+" fields but parsed "+i,l+r):i<m.length&&R("FieldMismatch","TooFewFields","Too few fields: expected "+m.length+" fields but parsed "+i,l+r)),n}var r=1;return!_.data.length||Array.isArray(_.data[0])?(_.data=_.data.map(t),r=_.data.length):_.data=t(_.data,0),e.header&&_.meta&&(_.meta.fields=m),l+=r,_}()}function w(){return e.header&&0===m.length}function C(t,r){return i=t,e.dynamicTypingFunction&&void 0===e.dynamicTyping[i]&&(e.dynamicTyping[i]=e.dynamicTypingFunction(i)),!0===(e.dynamicTyping[i]||e.dynamicTyping)?"true"===r||"TRUE"===r||"false"!==r&&"FALSE"!==r&&(function(e){if(o.test(e)){var t=parseFloat(e);if(s<t&&t<n)return!0}return!1}(r)?parseFloat(r):u.test(r)?new Date(r):""===r?null:r):r;var i}function R(e,t,r,i){var n={type:e,code:t,message:r};void 0!==i&&(n.row=i),_.errors.push(n)}this.parse=function(n,s,o){var u=e.quoteChar||'"';if(e.newline||(e.newline=function(e,t){e=e.substring(0,1048576);var r=new RegExp(p(t)+"([^]*?)"+p(t),"gm"),i=(e=e.replace(r,"")).split("\r"),n=e.split("\n"),s=1<n.length&&n[0].length<i[0].length;if(1===i.length||s)return"\n";for(var a=0,o=0;o<i.length;o++)"\n"===i[o][0]&&a++;return a>=i.length/2?"\r\n":"\r"}(n,u)),i=!1,e.delimiter)k(e.delimiter)&&(e.delimiter=e.delimiter(n),_.meta.delimiter=e.delimiter);else{var h=function(t,r,i,n,s){var o,u,h,f;s=s||[",","\t","|",";",a.RECORD_SEP,a.UNIT_SEP];for(var l=0;l<s.length;l++){var d=s[l],c=0,p=0,m=0;h=void 0;for(var _=new g({comments:n,delimiter:d,newline:r,preview:10}).parse(t),y=0;y<_.data.length;y++)if(i&&b(_.data[y]))m++;else{var v=_.data[y].length;p+=v,void 0!==h?0<v&&(c+=Math.abs(v-h),h=v):h=v}0<_.data.length&&(p/=_.data.length-m),(void 0===u||c<=u)&&(void 0===f||f<p)&&1.99<p&&(u=c,o=d,f=p)}return{successful:!!(e.delimiter=o),bestDelimiter:o}}(n,e.newline,e.skipEmptyLines,e.comments,e.delimitersToGuess);h.successful?e.delimiter=h.bestDelimiter:(i=!0,e.delimiter=a.DefaultDelimiter),_.meta.delimiter=e.delimiter}var f=v(e);return e.preview&&e.header&&f.preview++,t=n,r=new g(f),_=r.parse(t,s,o),E(),d?{meta:{paused:!0}}:_||{meta:{paused:!1}}},this.paused=function(){return d},this.pause=function(){d=!0,r.abort(),t=k(e.chunk)?"":t.substring(r.getCharIndex())},this.resume=function(){h.streamer._halted?(d=!1,h.streamer.parseChunk(t,!0)):setTimeout(h.resume,3)},this.aborted=function(){return c},this.abort=function(){c=!0,r.abort(),_.meta.aborted=!0,k(e.complete)&&e.complete(_),t=""}}function p(e){return e.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")}function g(e){var t,r=(e=e||{}).delimiter,i=e.newline,n=e.comments,s=e.step,o=e.preview,u=e.fastMode,h=t=void 0===e.quoteChar?'"':e.quoteChar;if(void 0!==e.escapeChar&&(h=e.escapeChar),("string"!=typeof r||-1<a.BAD_DELIMITERS.indexOf(r))&&(r=","),n===r)throw new Error("Comment character same as delimiter");!0===n?n="#":("string"!=typeof n||-1<a.BAD_DELIMITERS.indexOf(n))&&(n=!1),"\n"!==i&&"\r"!==i&&"\r\n"!==i&&(i="\n");var f=0,l=!1;this.parse=function(e,a,d){if("string"!=typeof e)throw new Error("Input must be a string");var c=e.length,g=r.length,m=i.length,_=n.length,y=k(s),v=[],b=[],E=[],w=f=0;if(!e)return z();if(u||!1!==u&&-1===e.indexOf(t)){for(var C=e.split(i),R=0;R<C.length;R++){if(E=C[R],f+=E.length,R!==C.length-1)f+=i.length;else if(d)return z();if(!n||E.substring(0,_)!==n){if(y){if(v=[],L(E.split(r)),q(),l)return z()}else L(E.split(r));if(o&&o<=R)return v=v.slice(0,o),z(!0)}}return z()}for(var O=e.indexOf(r,f),x=e.indexOf(i,f),S=new RegExp(p(h)+p(t),"g"),T=e.indexOf(t,f);;)if(e[f]!==t)if(n&&0===E.length&&e.substring(f,f+_)===n){if(-1===x)return z();f=x+m,x=e.indexOf(i,f),O=e.indexOf(r,f)}else{if(-1!==O&&(O<x||-1===x)){if(!(O<T)){E.push(e.substring(f,O)),f=O+g,O=e.indexOf(r,f);continue}var I=P(O,T,x);if(I&&void 0!==I.nextDelim){O=I.nextDelim,T=I.quoteSearch,E.push(e.substring(f,O)),f=O+g,O=e.indexOf(r,f);continue}}if(-1===x)break;if(E.push(e.substring(f,x)),M(x+m),y&&(q(),l))return z();if(o&&v.length>=o)return z(!0)}else for(T=f,f++;;){if(-1===(T=e.indexOf(t,T+1)))return d||b.push({type:"Quotes",code:"MissingQuotes",message:"Quoted field unterminated",row:v.length,index:f}),j();if(T===c-1)return j(e.substring(f,T).replace(S,t));if(t!==h||e[T+1]!==h){if(t===h||0===T||e[T-1]!==h){-1!==O&&O<T+1&&(O=e.indexOf(r,T+1)),-1!==x&&x<T+1&&(x=e.indexOf(i,T+1));var D=F(-1===x?O:Math.min(O,x));if(e[T+1+D]===r){E.push(e.substring(f,T).replace(S,t)),e[f=T+1+D+g]!==t&&(T=e.indexOf(t,f)),O=e.indexOf(r,f),x=e.indexOf(i,f);break}var A=F(x);if(e.substring(T+1+A,T+1+A+m)===i){if(E.push(e.substring(f,T).replace(S,t)),M(T+1+A+m),O=e.indexOf(r,f),T=e.indexOf(t,f),y&&(q(),l))return z();if(o&&v.length>=o)return z(!0);break}b.push({type:"Quotes",code:"InvalidQuotes",message:"Trailing quote on quoted field is malformed",row:v.length,index:f}),T++}}else T++}return j();function L(e){v.push(e),w=f}function F(t){var r=0;if(-1!==t){var i=e.substring(T+1,t);i&&""===i.trim()&&(r=i.length)}return r}function j(t){return d||(void 0===t&&(t=e.substring(f)),E.push(t),f=c,L(E),y&&q()),z()}function M(t){f=t,L(E),E=[],x=e.indexOf(i,f)}function z(e){return{data:v,errors:b,meta:{delimiter:r,linebreak:i,aborted:l,truncated:!!e,cursor:w+(a||0)}}}function q(){s(z()),v=[],b=[]}function P(i,n,s){var a={nextDelim:void 0,quoteSearch:void 0},o=e.indexOf(t,n+1);if(n<i&&i<o&&(o<s||-1===s)){var u=e.indexOf(r,o);if(-1===u)return a;o<u&&(o=e.indexOf(t,o+1)),a=P(u,o,s)}else a={nextDelim:i,quoteSearch:n};return a}},this.abort=function(){l=!0},this.getCharIndex=function(){return f}}function m(e){var t=e.data,r=n[t.workerId],i=!1;if(t.error)r.userError(t.error,t.file);else if(t.results&&t.results.data){var s={abort:function(){i=!0,_(t.workerId,{data:[],errors:[],meta:{aborted:!0}})},pause:y,resume:y};if(k(r.userStep)){for(var a=0;a<t.results.data.length&&(r.userStep({data:t.results.data[a],errors:t.results.errors,meta:t.results.meta},s),!i);a++);delete t.results}else k(r.userChunk)&&(r.userChunk(t.results,s,t.file),delete t.results)}t.finished&&!i&&_(t.workerId,t.results)}function _(e,t){var r=n[e];k(r.userComplete)&&r.userComplete(t),r.terminate(),delete n[e]}function y(){throw new Error("Not implemented.")}function v(e){if("object"!=typeof e||null===e)return e;var t=Array.isArray(e)?[]:{};for(var r in e)t[r]=v(e[r]);return t}function b(e,t){return function(){e.apply(t,arguments)}}function k(e){return"function"==typeof e}return i&&(t.onmessage=function(e){var r=e.data;if(void 0===a.WORKER_ID&&r&&(a.WORKER_ID=r.workerId),"string"==typeof r.input)t.postMessage({workerId:a.WORKER_ID,results:a.parse(r.input,r.config),finished:!0});else if(t.File&&r.input instanceof File||r.input instanceof Object){var i=a.parse(r.input,r.config);i&&t.postMessage({workerId:a.WORKER_ID,results:i,finished:!0})}}),(h.prototype=Object.create(u.prototype)).constructor=h,(f.prototype=Object.create(u.prototype)).constructor=f,(l.prototype=Object.create(l.prototype)).constructor=l,(d.prototype=Object.create(u.prototype)).constructor=d,a})?i.apply(t,n):i)||(e.exports=s)}]);
-//# sourceMappingURL=react-csv-reader.js.map
-
-/***/ }),
-
-/***/ "./node_modules/react-csv/index.js":
-/*!*****************************************!*\
-  !*** ./node_modules/react-csv/index.js ***!
-  \*****************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-module.exports = __webpack_require__(/*! ./lib/index.js */ "./node_modules/react-csv/lib/index.js");
-
-
-/***/ }),
-
-/***/ "./node_modules/react-csv/lib/components/Download.js":
-/*!***********************************************************!*\
-  !*** ./node_modules/react-csv/lib/components/Download.js ***!
-  \***********************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _react = __webpack_require__(/*! react */ "react");
-
-var _react2 = _interopRequireDefault(_react);
-
-var _core = __webpack_require__(/*! ../core */ "./node_modules/react-csv/lib/core.js");
-
-var _metaProps = __webpack_require__(/*! ../metaProps */ "./node_modules/react-csv/lib/metaProps.js");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var defaultProps = {
-  target: '_blank'
-};
-
-var CSVDownload = function (_React$Component) {
-  _inherits(CSVDownload, _React$Component);
-
-  function CSVDownload(props) {
-    _classCallCheck(this, CSVDownload);
-
-    var _this = _possibleConstructorReturn(this, (CSVDownload.__proto__ || Object.getPrototypeOf(CSVDownload)).call(this, props));
-
-    _this.state = {};
-    return _this;
-  }
-
-  _createClass(CSVDownload, [{
-    key: 'buildURI',
-    value: function buildURI() {
-      return _core.buildURI.apply(undefined, arguments);
-    }
-  }, {
-    key: 'componentDidMount',
-    value: function componentDidMount() {
-      var _props = this.props,
-          data = _props.data,
-          headers = _props.headers,
-          separator = _props.separator,
-          enclosingCharacter = _props.enclosingCharacter,
-          uFEFF = _props.uFEFF,
-          target = _props.target,
-          specs = _props.specs,
-          replace = _props.replace;
-
-      this.state.page = window.open(this.buildURI(data, uFEFF, headers, separator, enclosingCharacter), target, specs, replace);
-    }
-  }, {
-    key: 'getWindow',
-    value: function getWindow() {
-      return this.state.page;
-    }
-  }, {
-    key: 'render',
-    value: function render() {
-      return null;
-    }
-  }]);
-
-  return CSVDownload;
-}(_react2.default.Component);
-
-CSVDownload.defaultProps = Object.assign(_metaProps.defaultProps, defaultProps);
-CSVDownload.propTypes = _metaProps.propTypes;
-exports["default"] = CSVDownload;
-
-/***/ }),
-
-/***/ "./node_modules/react-csv/lib/components/Link.js":
-/*!*******************************************************!*\
-  !*** ./node_modules/react-csv/lib/components/Link.js ***!
-  \*******************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _react = __webpack_require__(/*! react */ "react");
-
-var _react2 = _interopRequireDefault(_react);
-
-var _core = __webpack_require__(/*! ../core */ "./node_modules/react-csv/lib/core.js");
-
-var _metaProps = __webpack_require__(/*! ../metaProps */ "./node_modules/react-csv/lib/metaProps.js");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var CSVLink = function (_React$Component) {
-  _inherits(CSVLink, _React$Component);
-
-  function CSVLink(props) {
-    _classCallCheck(this, CSVLink);
-
-    var _this = _possibleConstructorReturn(this, (CSVLink.__proto__ || Object.getPrototypeOf(CSVLink)).call(this, props));
-
-    _this.buildURI = _this.buildURI.bind(_this);
-    return _this;
-  }
-
-  _createClass(CSVLink, [{
-    key: 'buildURI',
-    value: function buildURI() {
-      return _core.buildURI.apply(undefined, arguments);
-    }
-  }, {
-    key: 'handleLegacy',
-    value: function handleLegacy(event) {
-      var isAsync = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
-      if (window.navigator.msSaveOrOpenBlob) {
-        event.preventDefault();
-
-        var _props = this.props,
-            data = _props.data,
-            headers = _props.headers,
-            separator = _props.separator,
-            filename = _props.filename,
-            enclosingCharacter = _props.enclosingCharacter,
-            uFEFF = _props.uFEFF;
-
-
-        var csvData = isAsync && typeof data === 'function' ? data() : data;
-
-        var blob = new Blob([uFEFF ? '\uFEFF' : '', (0, _core.toCSV)(csvData, headers, separator, enclosingCharacter)]);
-        window.navigator.msSaveBlob(blob, filename);
-
-        return false;
-      }
-    }
-  }, {
-    key: 'handleAsyncClick',
-    value: function handleAsyncClick(event) {
-      var _this2 = this;
-
-      var done = function done(proceed) {
-        if (proceed === false) {
-          event.preventDefault();
-          return;
-        }
-        _this2.handleLegacy(event, true);
-      };
-
-      this.props.onClick(event, done);
-    }
-  }, {
-    key: 'handleSyncClick',
-    value: function handleSyncClick(event) {
-      var stopEvent = this.props.onClick(event) === false;
-      if (stopEvent) {
-        event.preventDefault();
-        return;
-      }
-      this.handleLegacy(event);
-    }
-  }, {
-    key: 'handleClick',
-    value: function handleClick() {
-      var _this3 = this;
-
-      return function (event) {
-        if (typeof _this3.props.onClick === 'function') {
-          return _this3.props.asyncOnClick ? _this3.handleAsyncClick(event) : _this3.handleSyncClick(event);
-        }
-        _this3.handleLegacy(event);
-      };
-    }
-  }, {
-    key: 'render',
-    value: function render() {
-      var _this4 = this;
-
-      var _props2 = this.props,
-          data = _props2.data,
-          headers = _props2.headers,
-          separator = _props2.separator,
-          filename = _props2.filename,
-          uFEFF = _props2.uFEFF,
-          children = _props2.children,
-          onClick = _props2.onClick,
-          asyncOnClick = _props2.asyncOnClick,
-          enclosingCharacter = _props2.enclosingCharacter,
-          rest = _objectWithoutProperties(_props2, ['data', 'headers', 'separator', 'filename', 'uFEFF', 'children', 'onClick', 'asyncOnClick', 'enclosingCharacter']);
-
-      var isNodeEnvironment = typeof window === 'undefined';
-      var href = isNodeEnvironment ? '' : this.buildURI(data, uFEFF, headers, separator, enclosingCharacter);
-
-      return _react2.default.createElement(
-        'a',
-        _extends({
-          download: filename
-        }, rest, {
-          ref: function ref(link) {
-            return _this4.link = link;
-          },
-          target: '_self',
-          href: href,
-          onClick: this.handleClick()
-        }),
-        children
-      );
-    }
-  }]);
-
-  return CSVLink;
-}(_react2.default.Component);
-
-CSVLink.defaultProps = _metaProps.defaultProps;
-CSVLink.propTypes = _metaProps.propTypes;
-exports["default"] = CSVLink;
-
-/***/ }),
-
-/***/ "./node_modules/react-csv/lib/core.js":
-/*!********************************************!*\
-  !*** ./node_modules/react-csv/lib/core.js ***!
-  \********************************************/
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
-var isSafari = exports.isSafari = function isSafari() {
-  return (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)
-  );
-};
-
-var isJsons = exports.isJsons = function isJsons(array) {
-  return Array.isArray(array) && array.every(function (row) {
-    return (typeof row === "undefined" ? "undefined" : _typeof(row)) === 'object' && !(row instanceof Array);
-  });
-};
-
-var isArrays = exports.isArrays = function isArrays(array) {
-  return Array.isArray(array) && array.every(function (row) {
-    return Array.isArray(row);
-  });
-};
-
-var jsonsHeaders = exports.jsonsHeaders = function jsonsHeaders(array) {
-  return Array.from(array.map(function (json) {
-    return Object.keys(json);
-  }).reduce(function (a, b) {
-    return new Set([].concat(_toConsumableArray(a), _toConsumableArray(b)));
-  }, []));
-};
-
-var jsons2arrays = exports.jsons2arrays = function jsons2arrays(jsons, headers) {
-  headers = headers || jsonsHeaders(jsons);
-
-  var headerLabels = headers;
-  var headerKeys = headers;
-  if (isJsons(headers)) {
-    headerLabels = headers.map(function (header) {
-      return header.label;
-    });
-    headerKeys = headers.map(function (header) {
-      return header.key;
-    });
-  }
-
-  var data = jsons.map(function (object) {
-    return headerKeys.map(function (header) {
-      return getHeaderValue(header, object);
-    });
-  });
-  return [headerLabels].concat(_toConsumableArray(data));
-};
-
-var getHeaderValue = exports.getHeaderValue = function getHeaderValue(property, obj) {
-  var foundValue = property.replace(/\[([^\]]+)]/g, ".$1").split(".").reduce(function (o, p, i, arr) {
-    var value = o[p];
-    if (value === undefined || value === null) {
-      arr.splice(1);
-    } else {
-      return value;
-    }
-  }, obj);
-
-  return foundValue === undefined ? property in obj ? obj[property] : '' : foundValue;
-};
-
-var elementOrEmpty = exports.elementOrEmpty = function elementOrEmpty(element) {
-  return typeof element === 'undefined' || element === null ? '' : element;
-};
-
-var joiner = exports.joiner = function joiner(data) {
-  var separator = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ',';
-  var enclosingCharacter = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '"';
-
-  return data.filter(function (e) {
-    return e;
-  }).map(function (row) {
-    return row.map(function (element) {
-      return elementOrEmpty(element);
-    }).map(function (column) {
-      return "" + enclosingCharacter + column + enclosingCharacter;
-    }).join(separator);
-  }).join("\n");
-};
-
-var arrays2csv = exports.arrays2csv = function arrays2csv(data, headers, separator, enclosingCharacter) {
-  return joiner(headers ? [headers].concat(_toConsumableArray(data)) : data, separator, enclosingCharacter);
-};
-
-var jsons2csv = exports.jsons2csv = function jsons2csv(data, headers, separator, enclosingCharacter) {
-  return joiner(jsons2arrays(data, headers), separator, enclosingCharacter);
-};
-
-var string2csv = exports.string2csv = function string2csv(data, headers, separator, enclosingCharacter) {
-  return headers ? headers.join(separator) + "\n" + data : data.replace(/"/g, '""');
-};
-
-var toCSV = exports.toCSV = function toCSV(data, headers, separator, enclosingCharacter) {
-  if (isJsons(data)) return jsons2csv(data, headers, separator, enclosingCharacter);
-  if (isArrays(data)) return arrays2csv(data, headers, separator, enclosingCharacter);
-  if (typeof data === 'string') return string2csv(data, headers, separator);
-  throw new TypeError("Data should be a \"String\", \"Array of arrays\" OR \"Array of objects\" ");
-};
-
-var buildURI = exports.buildURI = function buildURI(data, uFEFF, headers, separator, enclosingCharacter) {
-  var csv = toCSV(data, headers, separator, enclosingCharacter);
-  var type = isSafari() ? 'application/csv' : 'text/csv';
-  var blob = new Blob([uFEFF ? "\uFEFF" : '', csv], { type: type });
-  var dataURI = "data:" + type + ";charset=utf-8," + (uFEFF ? "\uFEFF" : '') + csv;
-
-  var URL = window.URL || window.webkitURL;
-
-  return typeof URL.createObjectURL === 'undefined' ? dataURI : URL.createObjectURL(blob);
-};
-
-/***/ }),
-
-/***/ "./node_modules/react-csv/lib/index.js":
-/*!*********************************************!*\
-  !*** ./node_modules/react-csv/lib/index.js ***!
-  \*********************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports.CSVLink = exports.CSVDownload = undefined;
-
-var _Download = __webpack_require__(/*! ./components/Download */ "./node_modules/react-csv/lib/components/Download.js");
-
-var _Download2 = _interopRequireDefault(_Download);
-
-var _Link = __webpack_require__(/*! ./components/Link */ "./node_modules/react-csv/lib/components/Link.js");
-
-var _Link2 = _interopRequireDefault(_Link);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var CSVDownload = exports.CSVDownload = _Download2.default;
-var CSVLink = exports.CSVLink = _Link2.default;
-
-/***/ }),
-
-/***/ "./node_modules/react-csv/lib/metaProps.js":
-/*!*************************************************!*\
-  !*** ./node_modules/react-csv/lib/metaProps.js ***!
-  \*************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports.PropsNotForwarded = exports.defaultProps = exports.propTypes = undefined;
-
-var _react = __webpack_require__(/*! react */ "react");
-
-var _react2 = _interopRequireDefault(_react);
-
-var _propTypes = __webpack_require__(/*! prop-types */ "./node_modules/prop-types/index.js");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var propTypes = exports.propTypes = {
-  data: (0, _propTypes.oneOfType)([_propTypes.string, _propTypes.array, _propTypes.func]).isRequired,
-  headers: _propTypes.array,
-  target: _propTypes.string,
-  separator: _propTypes.string,
-  filename: _propTypes.string,
-  uFEFF: _propTypes.bool,
-  onClick: _propTypes.func,
-  asyncOnClick: _propTypes.bool,
-  enclosingCharacter: _propTypes.string
-};
-
-var defaultProps = exports.defaultProps = {
-  separator: ',',
-  filename: 'generatedBy_react-csv.csv',
-  uFEFF: true,
-  asyncOnClick: false,
-  enclosingCharacter: '"'
-};
-
-var PropsNotForwarded = exports.PropsNotForwarded = ['data', 'headers'];
-
-/***/ }),
-
 /***/ "./node_modules/react-notifications/lib/Notification.js":
 /*!**************************************************************!*\
   !*** ./node_modules/react-notifications/lib/Notification.js ***!
@@ -9581,6 +8955,98 @@ __webpack_require__.r(__webpack_exports__);
 var forceReflow = function forceReflow(node) {
   return node.scrollTop;
 };
+
+/***/ }),
+
+/***/ "./node_modules/use-scan-detection-react18/dist/index.js":
+/*!***************************************************************!*\
+  !*** ./node_modules/use-scan-detection-react18/dist/index.js ***!
+  \***************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var react_1 = __webpack_require__(/*! react */ "react");
+/**
+ * Checks for scan input within a container and sends the output to a callback function.
+ * @param param0 Config object
+ */
+var useScanDetection = function (_a) {
+    var _b = _a.timeToEvaluate, timeToEvaluate = _b === void 0 ? 100 : _b, _c = _a.averageWaitTime, averageWaitTime = _c === void 0 ? 50 : _c, _d = _a.startCharacter, startCharacter = _d === void 0 ? [] : _d, _e = _a.endCharacter, endCharacter = _e === void 0 ? [13, 27] : _e, onComplete = _a.onComplete, onError = _a.onError, _f = _a.minLength, minLength = _f === void 0 ? 1 : _f, ignoreIfFocusOn = _a.ignoreIfFocusOn, _g = _a.stopPropagation, stopPropagation = _g === void 0 ? false : _g, _h = _a.preventDefault, preventDefault = _h === void 0 ? false : _h, _j = _a.container, container = _j === void 0 ? document : _j;
+    var buffer = react_1.useRef([]);
+    var timeout = react_1.useRef(false);
+    var clearBuffer = function () {
+        buffer.current = [];
+    };
+    var evaluateBuffer = function () {
+        clearTimeout(timeout.current);
+        var sum = buffer.current
+            .map(function (_a, k, arr) {
+            var time = _a.time;
+            return k > 0 ? time - arr[k - 1].time : 0;
+        })
+            .slice(1)
+            .reduce(function (total, delta) { return total + delta; }, 0);
+        var avg = sum / (buffer.current.length - 1);
+        var code = buffer.current
+            .slice(startCharacter.length > 0 ? 1 : 0)
+            .map(function (_a) {
+            var char = _a.char;
+            return char;
+        })
+            .join("");
+        if (avg <= averageWaitTime
+            && buffer.current.slice(startCharacter.length > 0 ? 1 : 0).length >= minLength) {
+            onComplete(code);
+        }
+        else {
+            avg <= averageWaitTime && !!onError && onError(code);
+        }
+        clearBuffer();
+    };
+    var onKeyDown = react_1.useCallback(function (event) {
+        if (event.currentTarget !== ignoreIfFocusOn) {
+            if (endCharacter.includes(event.keyCode)) {
+                evaluateBuffer();
+            }
+            if (buffer.current.length > 0 || startCharacter.includes(event.keyCode) || startCharacter.length === 0) {
+                clearTimeout(timeout.current);
+                timeout.current = setTimeout(evaluateBuffer, timeToEvaluate);
+                buffer.current.push({ time: performance.now(), char: event.key });
+            }
+        }
+        if (stopPropagation) {
+            event.stopPropagation();
+        }
+        if (preventDefault) {
+            event.preventDefault();
+        }
+    }, [
+        startCharacter,
+        endCharacter,
+        timeToEvaluate,
+        onComplete,
+        onError,
+        minLength,
+        ignoreIfFocusOn,
+        stopPropagation,
+        preventDefault
+    ]);
+    react_1.useEffect(function () {
+        return function () {
+            clearTimeout(timeout.current);
+        };
+    }, []);
+    react_1.useEffect(function () {
+        container.addEventListener("keydown", (onKeyDown));
+        return function () {
+            container.removeEventListener("keydown", (onKeyDown));
+        };
+    }, [onKeyDown]);
+};
+exports["default"] = useScanDetection;
+//# sourceMappingURL=index.js.map
 
 /***/ }),
 

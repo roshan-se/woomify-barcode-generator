@@ -3,6 +3,7 @@ import DreamifyCsvImporter from "./global/CsvImporter";
 import DownloadCsv from "./global/DownloadCsv";
 import HidePriceOption from "./global/HidePriceOption";
 import Barcode from "react-barcode";
+import useScanDetection from "use-scan-detection-react18";
 
 export default function GlobalSettings() {
   const generateUniqueBarcodeNumber = () => {
@@ -22,6 +23,19 @@ export default function GlobalSettings() {
     productNumber: "",
   });
 
+  const [barcodeScan, setBarcodeScan] = useState("No Barcode Scanned");
+
+  useScanDetection({
+    onComplete: (code) => {
+      setBarcodeScan(code);
+      setBarcode((prevBarcode) => ({
+        ...prevBarcode,
+        productNumber: code,
+      }));
+    },
+    minLength: 3,
+  });
+
   const generateBarcode = () => {
     setBarcode((prevBarcode) => ({
       ...prevBarcode,
@@ -35,7 +49,7 @@ export default function GlobalSettings() {
         <div>
           <button
             onClick={generateBarcode}
-            className='bg-sky-400 hover:bg-sky-500 text-gray-50 hover:text-gray-50 px-4 py-2 rounded-tr-md rounded-bl-md'>
+            className='bg-violet-400 hover:bg-violet-500 text-gray-50 hover:text-gray-50 px-4 py-2 rounded-tr-md rounded-bl-md'>
             Generate Barcode
           </button>
           <hr />
@@ -48,6 +62,11 @@ export default function GlobalSettings() {
               />
             </div>
           )}
+        </div>
+        <div>
+          <h2 className='my-4 text-3xl font-semibold'>Scan Barcode</h2>
+          <hr />
+          Barcode: {barcodeScan}
         </div>
       </div>
     </div>
