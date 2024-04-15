@@ -19,6 +19,7 @@
     "react-csv-reader": "^4.0.0",
     "react-notifications": "^1.7.4",
     "react-papaparse": "^4.1.0",
+    "react-to-print": "^2.15.1",
     "style-loader": "^3.3.2",
     "use-scan-detection-react18": "^0.2.3"
   },

@@ -1,31 +1,54 @@
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Barcode from "react-barcode";
+import ReactToPrint from "react-to-print";
 
 const { ajax_url } = woomify_barcode_generator_data;
 
+const pageStyle = `
+@page {
+  size: 30mm 20mm
+};
+
+@media all {
+
+  .pageBreak {
+    display: none;
+  }
+};
+
+@media print {
+  .pageBreak {
+    page-break-before: always;
+  }
+}
+
+`;
+
 const GenerateBarcode = () => {
+  const ref = useRef();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [barcodeList, setBarcodeList] = useState([]);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.post(
-          ajax_url,
-          new URLSearchParams({
-            action: "woomify_get_products",
-          })
-        );
-        setProducts(response.data.data);
-        console.log("Checking Product WOomify: ", products);
-      } catch (error) {
-        console.error("Error fetching products: ", error);
-      }
-    };
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.post(
+        ajax_url,
+        new URLSearchParams({
+          action: "woomify_get_products",
+        })
+      );
+      setProducts(response.data.data);
+      console.log("Checking Product WOomify: ", products);
+    } catch (error) {
+      console.error("Error fetching products: ", error);
+    }
+  };
 
+  useEffect(() => {
     fetchProducts();
   }, []);
 
@@ -94,21 +117,30 @@ const GenerateBarcode = () => {
 
         <div className='mt-4'>
           <hr />
-
           <h3 className='text-xl font-semibold mt-4'>Product Barcode List</h3>
-
           {/* Loop for barcode */}
-          <div className='grid grid-cols-4 gap-x-2'>
+          <div
+            ref={ref}
+            className='grid grid-cols-6 gap-x-2'>
             {barcodeList.map((product) => (
               <div className='border rounded-md shadow-md p-4 my-4 flex flex-col items-center'>
-                <h3 className='text-base font-semibold'>{product.name}</h3>
+                <h3 className='text-sm font-semibold text-center'>
+                  {product.name}
+                </h3>
                 <Barcode
                   value={product.sku}
-                  width={2}
+                  width={1}
+                  height={40}
                 />
               </div>
             ))}
           </div>
+
+          <ReactToPrint
+            trigger={() => <button>Print</button>}
+            content={() => ref.current}
+            pageStyle={pageStyle}
+          />
         </div>
       </div>
     </div>
