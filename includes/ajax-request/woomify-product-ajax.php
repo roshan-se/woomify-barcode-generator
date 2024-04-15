@@ -91,6 +91,7 @@ function wp_ajax_woomify_get_products() {
 
     // Get products from WooCommerce
     $args = array(
+        'limit' => -1,
         'status' => 'publish',
     );
     $products = wc_get_products($args);
